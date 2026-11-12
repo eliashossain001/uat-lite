@@ -1,0 +1,9 @@
+name: uat-lite
+channels: [pytorch, nvidia, conda-forge]
+dependencies:
+  - python=3.10
+  - pytorch=2.3.1
+  - pytorch-cuda=12.1
+  - pip
+  - pip:
+      - -e .

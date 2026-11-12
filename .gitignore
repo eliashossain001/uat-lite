@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.vscode/
+.idea/
+.DS_Store
+.ipynb_checkpoints/
+.env
+
+# data, checkpoints and run outputs are not versioned
+/data
+/experiments
+/results
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npz
+*.zip
+wandb/
+logs/
