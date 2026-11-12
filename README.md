@@ -309,7 +309,7 @@ Released under the [Apache 2.0 License](LICENSE).
 <td>
 
 **[Elias Hossain](https://eliashossain001.github.io/)**<br/>
-PhD student, Industrial Engineering & Management Systems<br/>
+PhD Candidate<br/>
 Complex Adaptive Systems Lab, University of Central Florida
 
 [![Website](https://img.shields.io/badge/Website-eliashossain001.github.io-0ea5e9?logo=googlechrome&logoColor=white)](https://eliashossain001.github.io/)
@@ -317,7 +317,7 @@ Complex Adaptive Systems Lab, University of Central Florida
 [![Google Scholar](https://img.shields.io/badge/Google%20Scholar-profile-4285F4?logo=googlescholar&logoColor=white)](https://scholar.google.com/citations?user=l0L1NPAAAAAJ)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/elias-hossain-7448a736a/)
 [![ORCID](https://img.shields.io/badge/ORCID-0000--0002--8423--3981-A6CE39?logo=orcid&logoColor=white)](https://orcid.org/0000-0002-8423-3981)
-[![Email](https://img.shields.io/badge/Email-mdelias.hossain%40ucf.edu-EA4335?logo=gmail&logoColor=white)](mailto:mdelias.hossain@ucf.edu)
+[![Email](https://img.shields.io/badge/Email-elias.hossain191%40gmail.com-EA4335?logo=gmail&logoColor=white)](mailto:elias.hossain191@gmail.com)
 
 </td>
 </tr>
