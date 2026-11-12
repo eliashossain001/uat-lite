@@ -1,9 +1,38 @@
-# UAT-LITE: Inference-Time Uncertainty-Aware Attention for Pretrained Transformers
+<div align="center">
 
-UAT-LITE makes a fine-tuned transformer classifier uncertainty-aware **at inference time,
-without retraining or new parameters**. It runs *M* Monte Carlo dropout passes and, in
-every pass, attenuates the self-attention scores with token-level uncertainty estimated
-online from the stochastic embeddings:
+<img src="assets/banner.svg" alt="UAT-LITE" width="100%"/>
+
+[![arXiv](https://img.shields.io/badge/arXiv-2602.02952-b31b1b?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2602.02952)
+[![Checkpoints](https://img.shields.io/badge/checkpoints-v1.0-2ea44f?logo=github)](https://github.com/eliashossain001/uat-lite/releases/tag/v1.0)
+[![Python](https://img.shields.io/badge/python-3.10-3776AB?logo=python&logoColor=white)](#-installation)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.3-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org)
+[![Transformers](https://img.shields.io/badge/%F0%9F%A4%97%20transformers-4.41-FFD21E)](https://github.com/huggingface/transformers)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](#-installation)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
+**No retraining · No new parameters · Drop-in for any fine-tuned BERT-style classifier**
+
+</div>
+
+## ✨ Overview
+
+UAT-LITE makes a fine-tuned transformer classifier uncertainty-aware **at inference time**.
+It runs *M* Monte Carlo dropout passes and, in every pass, attenuates the self-attention
+scores with token-level uncertainty estimated online from the stochastic embeddings, so
+the model attends less to tokens it is unsure about.
+
+```mermaid
+flowchart LR
+    X([input x]) --> E["stochastic embeddings<br/>z⁽ᵐ⁾ = dropout(emb(x))"]
+    E --> A["uncertainty-weighted attention<br/>ã<sub>ij</sub> = a<sub>ij</sub> · exp(−λ u<sub>ij</sub>)"]
+    U[("online token uncertainty<br/>Û⁽ᵐ⁻¹⁾ (Welford)")] -. lagged .-> A
+    E -. update .-> U
+    A --> C["classifier logits⁽ᵐ⁾"]
+    C -->|"repeat m = 1..M"| P(["mean logits → p(y|x)<br/>+ optional temperature scaling"])
+```
+
+<details>
+<summary><b>Algorithm 1 as pseudocode</b></summary>
 
 ```
 for m = 1..M:
@@ -14,20 +43,23 @@ for m = 1..M:
 predict with the mean of logits(1..M);  optionally apply temperature scaling (UAT-LITE+TS)
 ```
 
+</details>
+
 The repository also contains the baselines (temperature scaling, MC dropout, deep
 ensembles, SWAG, isotonic regression), the evaluation protocol, and every ablation
 and diagnostic from the paper.
 
-## Contents
+## 🧭 Contents
 
-- [Installation](#installation): pip, conda or Docker
-- [Quick start](#quick-start)
-- [Reproducing the paper](#reproducing-the-paper)
-- [Inference options](#inference-options)
-- [Repository structure](#repository-structure)
-- [Citation](#citation)
+- [Installation](#-installation): pip, conda or Docker
+- [Quick start](#-quick-start)
+- [Checkpoints](#-checkpoints)
+- [Reproducing the paper](#-reproducing-the-paper)
+- [Inference options](#-inference-options)
+- [Repository structure](#-repository-structure)
+- [Citation](#-citation)
 
-## Installation
+## 📦 Installation
 
 Tested with Python 3.10, PyTorch 2.3.1 (CUDA 12.1), transformers 4.41.2 and datasets 2.19.2.
 
@@ -58,14 +90,15 @@ docker run --rm -it --gpus all \
 
 Run `make test` (CPU only, a few seconds) to check the installation.
 
-## Quick start
+## 🚀 Quick start
 
 ```python
 import torch
 from transformers import AutoTokenizer
 from uat_lite.inference import load_checkpoint
 
-model = load_checkpoint("experiments/mnli/bert-base-uncased/checkpoints/best_model.pt", "cuda")
+model = load_checkpoint(
+    "https://github.com/eliashossain001/uat-lite/releases/download/v1.0/mnli.pt", "cuda")  # or a local path
 tok = AutoTokenizer.from_pretrained(model.base_model_name)
 batch = tok(["A man is playing a guitar."], ["Someone makes music."], return_tensors="pt").to("cuda")
 
@@ -78,7 +111,7 @@ token_unc = out["token_uncertainty"]                            # U(x_j) per tok
 abstention decisions, epistemic/aleatoric scores and (with `return_layer_decomposition=True`)
 the layer-wise uncertainty attribution.
 
-### Checkpoints
+## 💾 Checkpoints
 
 The fine-tuned checkpoints are on the
 [v1.0 release page](https://github.com/eliashossain001/uat-lite/releases/tag/v1.0)
@@ -111,7 +144,7 @@ done
 
 To train them yourself instead, run `make train` and `make train-clinical`.
 
-## Reproducing the paper
+## 🔬 Reproducing the paper
 
 Every experiment is one `make` target (`make help` lists them) or one script. Shared options:
 `--M` (MC samples, default 10), `--uat` (estimator, see below), `--device`, and an output
@@ -158,7 +191,7 @@ which is fetched from the [official repository](https://github.com/tommccoy1/han
 type or instance` while loading a dataset, the local cache was written by a different
 `datasets` version; point it to a fresh directory, e.g. `export HF_DATASETS_CACHE=/tmp/hf_datasets`.
 
-## Inference options
+## 🔧 Inference options
 
 All estimators live in [`uat_lite/inference.py`](uat_lite/inference.py). Scripts select the
 estimator reported as **UAT-LITE** with `--uat`:
@@ -185,7 +218,7 @@ dropout active, mean of softmax).
 > `--uat embedding` (selective prediction: `--uat mc_logits`), and the submitted Q/K/V and
 > λ figures with `--impl pooling`. Pass these flags to regenerate them.
 
-## Repository structure
+## 🌳 Repository structure
 
 ```
 uat-lite/
@@ -217,12 +250,13 @@ uat-lite/
 │   └── export_checkpoints.py       # strip optimizer state for release (optional HF Hub upload)
 ├── tests/                          # CPU unit tests
 ├── Makefile                        # one target per experiment (make help)
-├── Dockerfile, environment.yml, requirements.txt, pyproject.toml
+├── assets/                         # README banner
+├── Dockerfile, environment.yml, requirements.txt, pyproject.toml, LICENSE
 ├── experiments/                    # checkpoints (created by training, not versioned)
 └── results/                        # outputs (not versioned)
 ```
 
-## Citation
+## 📝 Citation
 
 ```bibtex
 @article{hossain2026uat,
@@ -234,6 +268,6 @@ uat-lite/
 }
 ```
 
-## License
+## 📄 License
 
-Apache 2.0
+Released under the [Apache 2.0 License](LICENSE).
