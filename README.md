@@ -309,8 +309,8 @@ Released under the [Apache 2.0 License](LICENSE).
 <td>
 
 **[Elias Hossain](https://eliashossain001.github.io/)**<br/>
-PhD Candidate<br/>
-Complex Adaptive Systems Lab, University of Central Florida
+PhD Candidate, Complex Adaptive Systems Lab<br/>
+University of Central Florida
 
 [![Website](https://img.shields.io/badge/Website-eliashossain001.github.io-0ea5e9?logo=googlechrome&logoColor=white)](https://eliashossain001.github.io/)
 [![Project page](https://img.shields.io/badge/Project%20page-UAT--LITE-a78bfa)](https://eliashossain001.github.io/uat-lite/)
