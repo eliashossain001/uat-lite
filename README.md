@@ -50,6 +50,7 @@ and diagnostic from the paper.
 - [Inference options](#-inference-options)
 - [Repository structure](#-repository-structure)
 - [Citation](#-citation)
+- [Lead author & maintainer](#-lead-author--maintainer)
 
 ## 📦 Installation
 
@@ -297,3 +298,32 @@ uat-lite/
 ## 📄 License
 
 Released under the [Apache 2.0 License](LICENSE).
+
+## 👤 Lead author & maintainer
+
+<table>
+<tr>
+<td width="120" align="center">
+<a href="https://github.com/eliashossain001"><img src="https://github.com/eliashossain001.png" width="100" style="border-radius:50%" alt="Elias Hossain"/></a>
+</td>
+<td>
+
+**[Elias Hossain](https://eliashossain001.github.io/)**<br/>
+PhD student, Industrial Engineering & Management Systems<br/>
+Complex Adaptive Systems Lab, University of Central Florida
+
+[![Website](https://img.shields.io/badge/Website-eliashossain001.github.io-0ea5e9?logo=googlechrome&logoColor=white)](https://eliashossain001.github.io/)
+[![Project page](https://img.shields.io/badge/Project%20page-UAT--LITE-a78bfa)](https://eliashossain001.github.io/uat-lite/)
+[![Google Scholar](https://img.shields.io/badge/Google%20Scholar-profile-4285F4?logo=googlescholar&logoColor=white)](https://scholar.google.com/citations?user=l0L1NPAAAAAJ)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/elias-hossain-7448a736a/)
+[![ORCID](https://img.shields.io/badge/ORCID-0000--0002--8423--3981-A6CE39?logo=orcid&logoColor=white)](https://orcid.org/0000-0002-8423-3981)
+[![Email](https://img.shields.io/badge/Email-mdelias.hossain%40ucf.edu-EA4335?logo=gmail&logoColor=white)](mailto:mdelias.hossain@ucf.edu)
+
+</td>
+</tr>
+</table>
+
+Questions, bug reports and pull requests are welcome: please open an
+[issue](https://github.com/eliashossain001/uat-lite/issues) or reach out by email.
+If UAT-LITE is useful in your work, please ⭐ the repository and [cite the paper](#-citation).
+
