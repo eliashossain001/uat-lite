@@ -80,15 +80,36 @@ the layer-wise uncertainty attribution.
 
 ### Checkpoints
 
-Train them yourself (`make train`), or download the released ones from
-the Hugging Face Hub and pass them directly to any script:
+The fine-tuned checkpoints are on the
+[v1.0 release page](https://github.com/eliashossain001/uat-lite/releases/tag/v1.0)
+(weights and config only, ~0.44 GB each):
+
+| File | Task | Base model |
+|---|---|---|
+| `sst2.pt` | SST-2 (also used for IMDb) | bert-base-uncased |
+| `mnli.pt` | MNLI (also used for HANS, ANLI, SNLI) | bert-base-uncased |
+| `squad.pt` | SQuAD 2.0 | bert-base-uncased |
+| `medqa.pt` | MedQA | Bio_ClinicalBERT |
+| `pubmedqa.pt` | PubMedQA | Bio_ClinicalBERT |
+
+Pass a release URL to any script; the file is downloaded once and cached:
 
 ```bash
-python scripts/ood/anli.py --ckpt_path hf://HF_USER/uat-lite-checkpoints/mnli.pt
+python scripts/ood/anli.py --ckpt_path https://github.com/eliashossain001/uat-lite/releases/download/v1.0/mnli.pt
 ```
 
-Trained checkpoints are written to `experiments/<task>/bert-base-uncased/checkpoints/best_model.pt`,
-the default location every script reads from.
+Or place all of them at the default location that every script and `make` target reads from,
+`experiments/<task>/bert-base-uncased/checkpoints/best_model.pt`:
+
+```bash
+for t in sst2 mnli squad medqa pubmedqa; do
+  mkdir -p experiments/$t/bert-base-uncased/checkpoints
+  wget -O experiments/$t/bert-base-uncased/checkpoints/best_model.pt \
+    https://github.com/eliashossain001/uat-lite/releases/download/v1.0/$t.pt
+done
+```
+
+To train them yourself instead, run `make train` and `make train-clinical`.
 
 ## Reproducing the paper
 
@@ -175,7 +196,7 @@ uat-lite/
 │   │   ├── token_uncertainty.py    # stochastic embeddings
 │   │   ├── confidence_decision.py  # entropy-based confidence and abstention
 │   │   └── variance_decomposition.py  # layer-wise uncertainty attribution
-│   ├── inference.py                # checkpoint loading (local or hf://) and all estimators
+│   ├── inference.py                # checkpoint loading (local, URL or hf://), all estimators
 │   ├── calibration.py              # temperature scaling
 │   ├── metrics.py                  # ECE, Brier, NLL, AURC, selective prediction
 │   ├── protocol.py                 # five-method evaluation (Base, +TS, MC, UAT-LITE, +TS)
@@ -193,7 +214,7 @@ uat-lite/
 │   │                               # negation_sanity.py, behavioral.py, scale_geometry.py
 │   ├── efficiency/                 # gpu_latency.py
 │   ├── figures/                    # paper figures
-│   └── export_checkpoints.py       # strip optimizer state, upload checkpoints to the HF Hub
+│   └── export_checkpoints.py       # strip optimizer state for release (optional HF Hub upload)
 ├── tests/                          # CPU unit tests
 ├── Makefile                        # one target per experiment (make help)
 ├── Dockerfile, environment.yml, requirements.txt, pyproject.toml

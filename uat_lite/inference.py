@@ -23,6 +23,8 @@ predict_pooling_proxy       all dropout on; token uncertainty = std of the
 Which scripts report which estimator as "UAT-LITE" is listed in the README.
 """
 
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -32,10 +34,19 @@ from .models import UATLite
 
 
 def resolve_checkpoint(ckpt_path):
-    """Local path, or ``hf://<user>/<repo>/<file>`` downloaded from the Hugging Face Hub."""
-    if str(ckpt_path).startswith("hf://"):
+    """Local path, an ``http(s)://`` URL (e.g. a GitHub release asset, downloaded once and
+    cached under ``$TORCH_HOME/hub/checkpoints``), or ``hf://<user>/<repo>/<file>``."""
+    path = str(ckpt_path)
+    if path.startswith(("http://", "https://")):
+        cache = Path(torch.hub.get_dir()) / "checkpoints"
+        cache.mkdir(parents=True, exist_ok=True)
+        dst = cache / f"uat-lite-{path.rstrip('/').rsplit('/', 1)[-1]}"
+        if not dst.exists():
+            torch.hub.download_url_to_file(path, str(dst), progress=True)
+        return str(dst)
+    if path.startswith("hf://"):
         from huggingface_hub import hf_hub_download
-        user, repo, filename = str(ckpt_path)[5:].split("/", 2)
+        user, repo, filename = path[5:].split("/", 2)
         return hf_hub_download(repo_id=f"{user}/{repo}", filename=filename)
     return ckpt_path
 
@@ -43,7 +54,7 @@ def resolve_checkpoint(ckpt_path):
 def load_checkpoint(ckpt_path, device="cpu"):
     """Load a checkpoint written by ``scripts/train/train.py`` (dict with 'config').
 
-    ``ckpt_path`` may be a local file or ``hf://<user>/<repo>/<file>``.
+    ``ckpt_path`` may be a local file, a URL or ``hf://<user>/<repo>/<file>``.
     """
     ckpt = torch.load(resolve_checkpoint(ckpt_path), map_location=device, weights_only=False)
     if not (isinstance(ckpt, dict) and "config" in ckpt):
