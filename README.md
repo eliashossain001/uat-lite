@@ -21,18 +21,10 @@ It runs *M* Monte Carlo dropout passes and, in every pass, attenuates the self-a
 scores with token-level uncertainty estimated online from the stochastic embeddings, so
 the model attends less to tokens it is unsure about.
 
-```mermaid
-flowchart LR
-    X([input x]) --> E["stochastic embeddings<br/>z⁽ᵐ⁾ = dropout(emb(x))"]
-    E --> A["uncertainty-weighted attention<br/>ã<sub>ij</sub> = a<sub>ij</sub> · exp(−λ u<sub>ij</sub>)"]
-    U[("online token uncertainty<br/>Û⁽ᵐ⁻¹⁾ (Welford)")] -. lagged .-> A
-    E -. update .-> U
-    A --> C["classifier logits⁽ᵐ⁾"]
-    C -->|"repeat m = 1..M"| P(["mean logits → p(y|x)<br/>+ optional temperature scaling"])
-```
+<p align="center"><img src="assets/pipeline.svg" alt="How UAT-LITE works" width="100%"/></p>
 
 <details>
-<summary><b>Algorithm 1 as pseudocode</b></summary>
+<summary><b>📜 Algorithm 1 as pseudocode</b></summary>
 
 ```
 for m = 1..M:
@@ -63,20 +55,24 @@ and diagnostic from the paper.
 
 Tested with Python 3.10, PyTorch 2.3.1 (CUDA 12.1), transformers 4.41.2 and datasets 2.19.2.
 
-**pip**
-
 ```bash
 git clone https://github.com/eliashossain001/uat-lite.git && cd uat-lite
 pip install -e .
 ```
 
-**conda**
+<details>
+<summary><b>🐍 conda</b></summary>
 
 ```bash
 conda env create -f environment.yml && conda activate uat-lite
 ```
 
-**Docker** (no local Python setup needed; requires the NVIDIA Container Toolkit)
+</details>
+
+<details>
+<summary><b>🐳 Docker</b></summary>
+
+No local Python setup needed; requires the NVIDIA Container Toolkit.
 
 ```bash
 docker build -t uat-lite .
@@ -87,6 +83,8 @@ docker run --rm -it --gpus all \
   uat-lite
 # inside the container:  make test && make ood
 ```
+
+</details>
 
 Run `make test` (CPU only, a few seconds) to check the installation.
 
@@ -107,9 +105,14 @@ probs = torch.softmax(out["logits_samples"].mean(0), dim=-1)    # predictive dis
 token_unc = out["token_uncertainty"]                            # U(x_j) per token, [B, S]
 ```
 
+<details>
+<summary><b>➕ More outputs</b></summary>
+
 `model(input_ids, attention_mask, method="attention")` additionally returns confidence,
 abstention decisions, epistemic/aleatoric scores and (with `return_layer_decomposition=True`)
 the layer-wise uncertainty attribution.
+
+</details>
 
 ## 💾 Checkpoints
 
@@ -124,6 +127,9 @@ The fine-tuned checkpoints are on the
 | `squad.pt` | SQuAD 2.0 | bert-base-uncased |
 | `medqa.pt` | MedQA | Bio_ClinicalBERT |
 | `pubmedqa.pt` | PubMedQA | Bio_ClinicalBERT |
+
+<details>
+<summary><b>⬇️ Use a checkpoint by URL, or download all of them</b></summary>
 
 Pass a release URL to any script; the file is downloaded once and cached:
 
@@ -142,6 +148,8 @@ for t in sst2 mnli squad medqa pubmedqa; do
 done
 ```
 
+</details>
+
 To train them yourself instead, run `make train` and `make train-clinical`.
 
 ## 🔬 Reproducing the paper
@@ -157,6 +165,9 @@ make eval             # selective prediction, MNLI shift, clinical QA, OOD
 make ablations        # Q/K/V, λ, penalty form, negation, behavioral buckets
 make latency
 ```
+
+<details>
+<summary><b>🗺️ Paper section → script → make target</b></summary>
 
 | Paper section | Script | Make target |
 |---|---|---|
@@ -176,6 +187,11 @@ make latency
 | Scale and geometry diagnostics | `scripts/analysis/scale_geometry.py` | |
 | Baselines: vanilla, MC dropout, SWAG, ensembles, TS / isotonic | `scripts/train/train_baselines.py`, `train_swag.py`, `train_deep_ensemble.sh`, `scripts/evaluate/evaluate_baselines.py`, `evaluate_deep_ensemble.py`, `calibrate_posthoc.py` | |
 
+</details>
+
+<details>
+<summary><b>🧪 Evaluation protocol, data and troubleshooting</b></summary>
+
 **Evaluation protocol.** In-distribution evaluations split the validation set 50/50 with
 `numpy.random.RandomState(42)`: the first half fits temperatures, the second half is
 reported. OOD evaluations fit temperatures on in-distribution dev data (MNLI dev half for
@@ -191,6 +207,8 @@ which is fetched from the [official repository](https://github.com/tommccoy1/han
 type or instance` while loading a dataset, the local cache was written by a different
 `datasets` version; point it to a fresh directory, e.g. `export HF_DATASETS_CACHE=/tmp/hf_datasets`.
 
+</details>
+
 ## 🔧 Inference options
 
 All estimators live in [`uat_lite/inference.py`](uat_lite/inference.py). Scripts select the
@@ -205,7 +223,8 @@ estimator reported as **UAT-LITE** with `--uat`:
 The baselines use `predict_deterministic` (single pass) and `predict_mc_dropout` (all
 dropout active, mean of softmax).
 
-`forward_uat` options:
+<details>
+<summary><b>🎛️ <code>forward_uat</code> arguments</b></summary>
 
 | Argument | Values | Meaning |
 |---|---|---|
@@ -214,11 +233,16 @@ dropout active, mean of softmax).
 | `penalty` | `exponential`, `linear`, `reciprocal` | f(u) = exp(−λu), max(0, 1−λu), 1/(1+λu) |
 | `dropout_rates` | `(p_emb, p_attn, p_ffn)` | inference-time dropout, default `(0.1, 0.2, 0.3)` |
 
+</details>
+
 > **Version note.** The tables in the submitted version of the paper were produced with
 > `--uat embedding` (selective prediction: `--uat mc_logits`), and the submitted Q/K/V and
 > λ figures with `--impl pooling`. Pass these flags to regenerate them.
 
 ## 🌳 Repository structure
+
+<details>
+<summary><b>📁 Show the folder tree</b></summary>
 
 ```
 uat-lite/
@@ -250,11 +274,13 @@ uat-lite/
 │   └── export_checkpoints.py       # strip optimizer state for release (optional HF Hub upload)
 ├── tests/                          # CPU unit tests
 ├── Makefile                        # one target per experiment (make help)
-├── assets/                         # README banner
+├── assets/                         # README figures (animated SVG)
 ├── Dockerfile, environment.yml, requirements.txt, pyproject.toml, LICENSE
 ├── experiments/                    # checkpoints (created by training, not versioned)
 └── results/                        # outputs (not versioned)
 ```
+
+</details>
 
 ## 📝 Citation
 
